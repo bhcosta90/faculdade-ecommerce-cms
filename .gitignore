@@ -1,0 +1,45 @@
+# WordPress core — vem do instalador oficial, não versionamos
+/wp-admin/
+/wp-includes/
+/index.php
+/license.txt
+/readme.html
+/wp-activate.php
+/wp-blog-header.php
+/wp-comments-post.php
+/wp-cron.php
+/wp-links-opml.php
+/wp-load.php
+/wp-login.php
+/wp-mail.php
+/wp-settings.php
+/wp-signup.php
+/wp-trackback.php
+/xmlrpc.php
+
+# Config local com credenciais — nunca commitar
+/wp-config.php
+/.htaccess
+
+# Conteúdo gerado em runtime
+/wp-content/cache/
+/wp-content/upgrade/
+/wp-content/upgrade-temp-backup/
+/wp-content/backup-db/
+/wp-content/backups/
+/wp-content/blogs.dir/
+/wp-content/advanced-cache.php
+/wp-content/wp-cache-config.php
+/wp-content/object-cache.php
+/wp-content/db.php
+/wp-content/debug.log
+/wp-content/mu-plugins/
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
