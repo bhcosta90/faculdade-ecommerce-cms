@@ -11,8 +11,8 @@ Botiga customizado.
 - WordPress 6.9 (pt-BR)
 - WooCommerce 10.7
 - Tema Botiga 2.4
-- PHP 8.3
-- MySQL 8 (compatível com MariaDB do XAMPP também)
+- PHP 8.0+ (testado em 8.3)
+- MySQL 8 / MariaDB 10.5+ (dump usa `utf8mb4_unicode_520_ci`)
 
 ## O que está neste repositório
 
@@ -22,7 +22,7 @@ Botiga customizado.
 │   └── loja-faculdade.sql     # dump inicial do banco (produtos, config etc.)
 ├── wp-content/
 │   ├── plugins/               # woocommerce, woocommerce-paypal-payments, akismet
-│   ├── themes/                # botiga (ativo) + temas default do WP
+│   ├── themes/                # botiga (ativo), storefront (WooCommerce) + temas default do WP
 │   ├── languages/             # traduções pt-BR
 │   ├── fonts/                 # fontes baixadas pelo WP
 │   ├── uploads/               # imagens de produto e logo
@@ -43,11 +43,11 @@ repo pequeno e focado no conteúdo.
 Funciona em qualquer stack que tenha PHP 8.0+ e MySQL/MariaDB (XAMPP, MAMP,
 Local, Laravel Herd/Valet + Takeout, `php -S`, etc.).
 
-1. **Baixe o WordPress** em <https://br.wordpress.org/download/> (ou
-   `wp core download --locale=pt_BR`) e extraia os arquivos do core na raiz
-   deste repositório. O `.gitignore` já está configurado para manter
-   `wp-admin/`, `wp-includes/`, os arquivos `wp-*.php` do core e o
-   `wp-config.php` fora do git, mesmo estando em disco.
+1. **Baixe o WordPress** em <https://br.wordpress.org/download/> e extraia
+   os arquivos do core na raiz deste repositório (ou, dentro da pasta do
+   projeto, rode `wp core download --locale=pt_BR --path=.`). O `.gitignore`
+   já está configurado para manter `wp-admin/`, `wp-includes/`, os arquivos
+   `wp-*.php` do core e o `wp-config.php` fora do git, mesmo estando em disco.
 
 2. **Crie um banco** vazio no seu MySQL/MariaDB (nome à sua escolha, ex.
    `loja_faculdade`) e importe o dump:
