@@ -36,10 +36,13 @@ tema **Botiga** como visual da loja.
 
 O core do WP, plugins e tema estão **versionados**. O estado "instalado e
 configurado" (plugins ativos, produtos, categoria, PayPal, frete, logo)
-mora no dump SQL em `database/woocommerce_db.sql`, que traz `DROP TABLE
-IF EXISTS` em todas as tabelas — importar por cima de um banco existente
-sobrescreve o estado sem deixar sujeira. Só o `wp-config.php` (com
-credenciais) e caches de runtime ficam fora do git.
+mora no dump SQL em `database/woocommerce_db.sql`. O dump já traz
+`CREATE DATABASE IF NOT EXISTS woocommerce_db` + `USE woocommerce_db`
+no topo, então **o banco é sempre criado/selecionado como
+`woocommerce_db`**, independente do cliente (phpMyAdmin, DBeaver, CLI).
+Cada tabela também tem `DROP TABLE IF EXISTS`, o que permite reimportar
+por cima pra atualizar o estado sem deixar sujeira. Só o `wp-config.php`
+(com credenciais) e caches de runtime ficam fora do git.
 
 ---
 

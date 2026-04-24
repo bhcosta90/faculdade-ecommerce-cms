@@ -22,6 +22,15 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Banco alvo: o dump sempre importa em `woocommerce_db`, independente de qual
+-- banco estiver selecionado no cliente (phpMyAdmin, DBeaver, mysql CLI).
+--
+CREATE DATABASE IF NOT EXISTS `woocommerce_db`
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_520_ci;
+USE `woocommerce_db`;
+
+--
 -- Table structure for table `wp_actionscheduler_actions`
 --
 
