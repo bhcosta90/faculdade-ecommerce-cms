@@ -9,7 +9,7 @@
  */
 
 // ** Database settings ** //
-define('DB_NAME',     getenv('WORDPRESS_DB_NAME')     ?: 'wordpress');
+define('DB_NAME',     getenv('WORDPRESS_DB_NAME')     ?: 'woocommerce_db');
 define('DB_USER',     getenv('WORDPRESS_DB_USER')     ?: 'root');
 define('DB_PASSWORD', getenv('WORDPRESS_DB_PASSWORD') ?: '');
 define('DB_HOST',     getenv('WORDPRESS_DB_HOST')     ?: '127.0.0.1');
