@@ -28,10 +28,7 @@ tema **Botiga** como visual da loja.
 ├── wp-content/
 │   ├── plugins/               # woocommerce, woocommerce-paypal-payments, akismet
 │   ├── themes/                # botiga (ativo) + storefront + temas default
-│   ├── languages/             # traduções pt-BR
-│   ├── fonts/                 # fontes do WP
 │   └── uploads/               # imagens de produto e logo
-├── setup.sh                   # automação para Valet/Herd/Linux
 ├── wp-config-sample.php       # template (copie para wp-config.php)
 ├── .gitignore
 └── README.md
@@ -39,8 +36,10 @@ tema **Botiga** como visual da loja.
 
 O core do WP, plugins e tema estão **versionados**. O estado "instalado e
 configurado" (plugins ativos, produtos, categoria, PayPal, frete, logo)
-mora no dump SQL em `database/woocommerce_db.sql`. Só o `wp-config.php`
-(com credenciais) e caches de runtime ficam fora do git.
+mora no dump SQL em `database/woocommerce_db.sql`, que traz `DROP TABLE
+IF EXISTS` em todas as tabelas — importar por cima de um banco existente
+sobrescreve o estado sem deixar sujeira. Só o `wp-config.php` (com
+credenciais) e caches de runtime ficam fora do git.
 
 ---
 
@@ -81,6 +80,11 @@ Ainda no phpMyAdmin, selecione o banco `woocommerce_db` → aba
 Isso popula todas as tabelas do WordPress + WooCommerce já com os
 plugins ativados, produtos, categoria, frete e configuração do PayPal.
 
+> **Importando num banco que já tem WP?** Tudo bem. O dump derruba as
+> tabelas dele e recria (`DROP TABLE IF EXISTS` em todas), então a
+> importação funciona como *update* — sobrescreve o estado atual pelo
+> do dump sem precisar de banco vazio.
+
 ### 6. Gere o `wp-config.php`
 
 Dentro de `htdocs/woocommerce/`, copie o arquivo de exemplo:
@@ -93,6 +97,12 @@ No Windows, duplique o arquivo pelo Explorer e renomeie para
 `wp-config.php`. As credenciais padrão do XAMPP (`root` sem senha e
 banco `woocommerce_db`) já estão configuradas no sample — não precisa
 editar.
+
+> Se você usou um nome de banco diferente no passo 4 (ex.: `ecommerce`),
+> abra o `wp-config.php` e ajuste o `DB_NAME` pra bater. **Esse é o
+> erro mais comum:** o WP conecta num banco diferente do que recebeu o
+> dump, mostra a tela "adicionar seu primeiro produto" no admin e
+> parece que o dump não trouxe nada.
 
 ### 7. Abra a loja
 
@@ -109,32 +119,22 @@ Acesse <http://localhost/woocommerce/wp-admin> e faça login:
 
 ---
 
-## Alternativa — Valet / Herd / Linux (com script)
+## Alternativa — DBeaver (ou outro cliente MySQL)
 
-Para quem não usa XAMPP (ex.: Laravel Valet + Takeout, Herd, Linux com
-MySQL nativo), rode o `setup.sh` da raiz do projeto:
+Se preferir não usar phpMyAdmin, o dump pode ser importado por qualquer
+cliente MySQL. Exemplo com **DBeaver**:
 
-```bash
-./setup.sh                          # defaults: banco woocommerce_db, URL http://localhost/woocommerce
-./setup.sh http://loja.test         # cria banco, importa dump E reescreve URL
-DB_USER=root DB_PASSWORD=secret ./setup.sh http://loja.test
-```
+1. Garanta que o servidor MySQL do XAMPP esteja rodando.
+2. No **Database Navigator**, clique com o botão direito na conexão →
+   *Create New Database* → nome `woocommerce_db` → *OK*.
+3. Clique com o botão direito no banco criado → *Tools* → *Execute SQL
+   Script* → selecione `database/woocommerce_db.sql` → *Start*.
+4. Siga do passo 6 em diante do fluxo XAMPP (gerar `wp-config.php`
+   apontando pro banco que você acabou de criar).
 
-O script:
-
-1. Detecta o cliente `mysql` no PATH (ou cai em container do Takeout se
-   achar um `TO--mysql-*` rodando).
-2. Cria o banco `woocommerce_db` com o collation correto.
-3. Importa `database/woocommerce_db.sql`.
-4. Gera `wp-config.php` a partir do sample.
-5. Se você passar uma URL como argumento e tiver WP-CLI, roda
-   `wp search-replace` pra ajustar todas as URLs do site.
-
-Depois é só apontar seu servidor pra esta pasta (`valet link
-woocommerce`, adicionar o site no Herd, etc.) e abrir a URL.
-
-> **Não use `php -S` puro:** ele não reescreve URLs pra `index.php`,
-> então permalinks do WP quebram. Use Apache/Nginx.
+> **Não use `php -S` puro pra servir:** ele não reescreve URLs pra
+> `index.php`, então os permalinks do WP quebram. Use o Apache do
+> XAMPP (ou Nginx).
 
 ---
 
@@ -156,35 +156,28 @@ woocommerce`, adicionar o site no Herd, etc.) e abrir a URL.
 
 ## Troubleshooting
 
+**Admin abriu na tela "adicione seu primeiro produto" (lista de produtos
+vazia)**
+O WP conectou num banco diferente do que recebeu o dump. Confirme que o
+`DB_NAME` no `wp-config.php` é exatamente o banco onde você importou o
+`.sql`. Ajuste, salve e dê F5.
+
 **Abriu e caiu na tela "Instalar WordPress"**
 O banco ainda não tem os dados do dump. Volte ao passo 5 ou confirme que
-o `wp-config.php` aponta pro banco `woocommerce_db` correto.
+o `wp-config.php` aponta pro banco correto.
 
 **404 ou redireciona pra outra URL**
 O `siteurl` no banco não bate com a URL que você está acessando. O dump
 vem com `http://localhost/woocommerce`. Se você acessa por outra URL,
-rode:
-
-```bash
-wp search-replace 'http://localhost/woocommerce' 'http://sua-url-local'
-```
-
-Sem WP-CLI, instale o plugin **Better Search Replace** (WP Admin →
-Ferramentas → Better Search Replace). Um `UPDATE` só em `siteurl`/`home`
-**não** resolve — deixa imagens, menus e links em posts apontando pro
-domínio antigo.
+instale o plugin **Better Search Replace** (WP Admin → Ferramentas →
+Better Search Replace) e troque `http://localhost/woocommerce` pela sua
+URL em todas as tabelas. Um `UPDATE` só em `siteurl`/`home` **não**
+resolve — deixa imagens, menus e links em posts apontando pro domínio
+antigo.
 
 **CSS ou permalinks quebrados**
 WP Admin → **Configurações → Links Permanentes → Salvar**. Regenera o
 `.htaccess`.
-
-**Recriar o dump a partir do estado atual** (normaliza URL pra
-`http://localhost/woocommerce` antes de exportar):
-
-```bash
-wp search-replace 'http://SITE-ATUAL' 'http://localhost/woocommerce' \
-    --export=database/woocommerce_db.sql --all-tables
-```
 
 ---
 
