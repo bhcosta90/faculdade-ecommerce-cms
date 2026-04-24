@@ -69,26 +69,23 @@ Copie **todo o conteúdo desta pasta** (core do WP + `wp-content/` +
 Abra o **XAMPP Control Panel** e clique em *Start* em **Apache** e em
 **MySQL**.
 
-### 4. Crie o banco `woocommerce_db`
+### 4. Importe o dump
 
-Acesse <http://localhost/phpmyadmin/>, clique em **New** na lateral
-esquerda, use o nome **`woocommerce_db`** e clique em *Criar*.
-
-### 5. Importe o dump
-
-Ainda no phpMyAdmin, selecione o banco `woocommerce_db` → aba
-**Importar** → *Escolher arquivo* → selecione
+Acesse <http://localhost/phpmyadmin/>, clique em **Importar** no menu
+superior → *Escolher arquivo* → selecione
 `htdocs/woocommerce/database/woocommerce_db.sql` → *Executar*.
 
-Isso popula todas as tabelas do WordPress + WooCommerce já com os
-plugins ativados, produtos, categoria, frete e configuração do PayPal.
+Não precisa criar o banco antes: o dump traz
+`CREATE DATABASE IF NOT EXISTS woocommerce_db` + `USE woocommerce_db`,
+então o phpMyAdmin cria e seleciona o banco sozinho e popula todas as
+tabelas do WordPress + WooCommerce com os plugins ativados, produtos,
+categoria, frete e configuração do PayPal.
 
-> **Importando num banco que já tem WP?** Tudo bem. O dump derruba as
-> tabelas dele e recria (`DROP TABLE IF EXISTS` em todas), então a
-> importação funciona como *update* — sobrescreve o estado atual pelo
-> do dump sem precisar de banco vazio.
+> **Reimportar por cima?** Tudo bem. O dump usa `DROP TABLE IF EXISTS`
+> em todas as tabelas — a reimportação funciona como *update*,
+> sobrescrevendo o estado atual pelo do dump.
 
-### 6. Gere o `wp-config.php`
+### 5. Gere o `wp-config.php`
 
 Dentro de `htdocs/woocommerce/`, copie o arquivo de exemplo:
 
@@ -101,16 +98,32 @@ No Windows, duplique o arquivo pelo Explorer e renomeie para
 banco `woocommerce_db`) já estão configuradas no sample — não precisa
 editar.
 
-> Se você usou um nome de banco diferente no passo 4 (ex.: `ecommerce`),
-> abra o `wp-config.php` e ajuste o `DB_NAME` pra bater. **Esse é o
-> erro mais comum:** o WP conecta num banco diferente do que recebeu o
-> dump, mostra a tela "adicionar seu primeiro produto" no admin e
-> parece que o dump não trouxe nada.
+### 6. (Opcional) Ajuste a URL do site
+
+O dump vem com `http://localhost/woocommerce` como URL canônica (é o
+case do enunciado, com XAMPP em `htdocs/woocommerce`). Se você serve
+por outra URL — Laravel Valet (`http://woocommerce.test`), Herd,
+domínio local customizado etc. — rode no phpMyAdmin (aba **SQL** do
+banco `woocommerce_db`) ou em qualquer cliente MySQL:
+
+```sql
+UPDATE wp_options
+   SET option_value = 'http://sua-url-local'
+ WHERE option_name IN ('siteurl', 'home');
+```
+
+Troque `http://sua-url-local` pela URL do seu servidor (ex.:
+`http://woocommerce.test`). Isso basta pro WordPress carregar no
+endereço novo. Se depois você notar imagens, menus ou links em posts
+ainda apontando pra `http://localhost/woocommerce`, rode o fluxo
+completo com o plugin **Better Search Replace** (ver *Troubleshooting*)
+— um `UPDATE` direto não mexe em strings serializadas.
 
 ### 7. Abra a loja
 
-Acesse <http://localhost/woocommerce> no navegador. A loja já abre
-pronta, com produtos, categoria, frete e PayPal configurados.
+Acesse <http://localhost/woocommerce> (ou a URL que você definiu no
+passo 6). A loja já abre pronta, com produtos, categoria, frete e
+PayPal configurados.
 
 ### 8. Entre no painel admin
 
@@ -127,13 +140,13 @@ Acesse <http://localhost/woocommerce/wp-admin> e faça login:
 Se preferir não usar phpMyAdmin, o dump pode ser importado por qualquer
 cliente MySQL. Exemplo com **DBeaver**:
 
-1. Garanta que o servidor MySQL do XAMPP esteja rodando.
-2. No **Database Navigator**, clique com o botão direito na conexão →
-   *Create New Database* → nome `woocommerce_db` → *OK*.
-3. Clique com o botão direito no banco criado → *Tools* → *Execute SQL
-   Script* → selecione `database/woocommerce_db.sql` → *Start*.
-4. Siga do passo 6 em diante do fluxo XAMPP (gerar `wp-config.php`
-   apontando pro banco que você acabou de criar).
+1. Garanta que o servidor MySQL do XAMPP esteja rodando e conecte nele
+   no DBeaver.
+2. Abra um editor SQL na conexão → *Execute SQL Script* → selecione
+   `database/woocommerce_db.sql` → *Start*. O próprio dump cria o banco
+   `woocommerce_db` (`CREATE DATABASE IF NOT EXISTS` + `USE` no topo),
+   então não precisa criar antes.
+3. Siga do passo 5 em diante do fluxo XAMPP (gerar `wp-config.php`).
 
 > **Não use `php -S` puro pra servir:** ele não reescreve URLs pra
 > `index.php`, então os permalinks do WP quebram. Use o Apache do
@@ -160,14 +173,11 @@ cliente MySQL. Exemplo com **DBeaver**:
 ## Troubleshooting
 
 **Admin abriu na tela "adicione seu primeiro produto" (lista de produtos
-vazia)**
-O WP conectou num banco diferente do que recebeu o dump. Confirme que o
-`DB_NAME` no `wp-config.php` é exatamente o banco onde você importou o
-`.sql`. Ajuste, salve e dê F5.
-
-**Abriu e caiu na tela "Instalar WordPress"**
-O banco ainda não tem os dados do dump. Volte ao passo 5 ou confirme que
-o `wp-config.php` aponta pro banco correto.
+vazia) ou "Instalar WordPress"**
+O WP está conectando num banco diferente de `woocommerce_db` (o dump
+sempre importa nesse nome). Abra o `wp-config.php` e confirme que
+`DB_NAME` é exatamente `woocommerce_db`. Se o dump não foi importado
+ainda, volte ao passo 4.
 
 **404 ou redireciona pra outra URL**
 O `siteurl` no banco não bate com a URL que você está acessando. O dump
