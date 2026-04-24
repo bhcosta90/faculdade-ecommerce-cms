@@ -41,8 +41,9 @@ mora no dump SQL em `database/woocommerce_db.sql`. O dump já traz
 no topo, então **o banco é sempre criado/selecionado como
 `woocommerce_db`**, independente do cliente (phpMyAdmin, DBeaver, CLI).
 Cada tabela também tem `DROP TABLE IF EXISTS`, o que permite reimportar
-por cima pra atualizar o estado sem deixar sujeira. Só o `wp-config.php`
-(com credenciais) e caches de runtime ficam fora do git.
+por cima pra atualizar o estado sem deixar sujeira. Ficam fora do git
+apenas o `wp-config.php` (credenciais), o `.htaccess` gerado pelo WP e
+caches/arquivos de runtime.
 
 ---
 
@@ -159,7 +160,7 @@ cliente MySQL. Exemplo com **DBeaver**:
 - [x] WordPress + WooCommerce instalados (pt-BR)
 - [x] Banco de dados com dump `.sql` reprodutível (`woocommerce_db`)
 - [x] 3 produtos completos (título, descrição, preço, estoque,
-      dimensões, imagem)
+      dimensões, imagem) + 5 extras simples
 - [x] 1 categoria nova criada (`Rosto`) com imagem e descrição
 - [x] Métodos de pagamento configurados (COD, Transferência, PayPal)
 - [x] Impostos desativados
